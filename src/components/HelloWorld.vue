@@ -83,10 +83,10 @@
 </template>
 
 <script>
-import Grid from './Grid.vue'
+import Grid from "./Grid.vue";
 export default {
   name: "HelloWorld",
-  components: {Grid},
+  components: { Grid },
   data: () => ({
     ecosystem: [
       {

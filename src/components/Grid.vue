@@ -11,7 +11,7 @@
         <div
           :ref="'r' + (rSquare - 1) + 'c' + (cSquare - 1)"
           :id="'r' + (rSquare - 1) + 'c' + (cSquare - 1)"
-          style="text-align:center;font-size:56px;"
+          :style="'text-align:center;font-size:' + (56 * 5) / squares + 'px;'"
         >
           <br />
         </div>
@@ -69,6 +69,15 @@ export default {
       }
       this.highlightMe();
     },
+    // colorText() {
+    //   let square = this.getFromCurrentSquare("square");
+    //   console.log(square);
+    //   if (this.currentContents != "?") {
+    //     square.style.color = "white";
+    //   } else {
+    //     square.style.color = "black";
+    //   }
+    // },
     deleteLetterFromGrid() {
       if (this.currentSquare) {
         this.$refs[this.currentSquare][0].innerHTML = "<br />";
@@ -132,7 +141,6 @@ export default {
     },
     getFromCurrentSquare(element) {
       if (element == "grid") {
-        console.log(this.currentSquare);
         return this.$refs[this.currentSquare][0].parentElement.parentElement
           .parentElement;
       }
@@ -152,6 +160,7 @@ export default {
         trs.forEach(tr => {
           tr.children.forEach(td => {
             td.children[0].style.backgroundColor = color;
+            td.children[0].style.color = "black";
           });
         });
       }
@@ -175,6 +184,7 @@ export default {
       if (area == "square") {
         let square = this.getFromCurrentSquare("square");
         square.style.backgroundColor = color;
+        square.style.color = "white";
       }
     },
     highlightMe: function() {
@@ -192,7 +202,6 @@ export default {
         }, this.delay);
       } else {
         clearTimeout(this.timer);
-        console.log("double click!");
         this.switchMode();
         this.clicks = 0;
       }
