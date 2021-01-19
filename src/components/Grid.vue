@@ -69,15 +69,6 @@ export default {
       }
       this.highlightMe();
     },
-    // colorText() {
-    //   let square = this.getFromCurrentSquare("square");
-    //   console.log(square);
-    //   if (this.currentContents != "?") {
-    //     square.style.color = "white";
-    //   } else {
-    //     square.style.color = "black";
-    //   }
-    // },
     deleteLetterFromGrid() {
       if (this.currentSquare) {
         this.$refs[this.currentSquare][0].innerHTML = "<br />";
