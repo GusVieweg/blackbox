@@ -21,7 +21,7 @@
 </template>
 
 <script>
-// import _ from "lodash";
+import _ from "lodash";
 
 export default {
   name: "Grid",
@@ -37,7 +37,8 @@ export default {
     };
   },
   props: {
-    squares: Number
+    squares: Number,
+    blackbox: Boolean
   },
   beforeMount() {
     this.buildGrid();
@@ -67,7 +68,17 @@ export default {
         this.currentSquare = event.srcElement.id;
         this.handleDoubleClick();
       }
+      this.handleBlackbox();
       this.highlightMe();
+    },
+    handleBlackbox() {
+      if (this.currentSquare) {
+        if (this.blackbox) {
+          this.grid[this.currentRow][this.currentColumn] = "+";
+        } else {
+          this.grid[this.currentRow][this.currentColumn] = "?";
+        }
+      }
     },
     deleteLetterFromGrid() {
       if (this.currentSquare) {
@@ -81,34 +92,61 @@ export default {
         this.grid[this.currentRow][this.currentColumn] = letter;
       }
     },
+    checkForBlackWall(direction) {
+      if (this.mode == "row" && direction == "forward") {
+        return /^[+\s]+$/.test(
+          this.grid[this.currentRow].join("").substr(this.currentColumn + 1)
+        );
+      }
+      if (this.mode == "row" && direction == "backward") {
+        return /^[+\s]+$/.test(
+          this.grid[this.currentRow].join("").substr(0, this.currentColumn)
+        );
+      }
+      if (this.mode == "column" && direction == "forward") {
+        return /^[+\s]+$/.test(
+          _.map(this.grid, c => c[this.currentColumn])
+            .join("")
+            .substr(this.currentRow + 1)
+        );
+      }
+      if (this.mode == "column" && direction == "backward") {
+        return /^[+\s]+$/.test(
+          _.map(this.grid, c => c[this.currentColumn])
+            .join("")
+            .substr(0, this.currentRow)
+        );
+      }
+    },
     progressSquare(direction) {
       let exceeded = false;
       if (this.currentSquare) {
         // Error checking for grid-end conditions
+        exceeded = this.checkForBlackWall(direction);
         if (direction == "forward") {
           if (this.mode == "row") {
-            exceeded = Number(this.currentColumn) + 1 >= this.squares;
+            exceeded |= this.currentColumn + 1 >= this.squares;
             let newColumn = exceeded
-              ? Number(this.currentColumn)
-              : Number(this.currentColumn) + 1;
+              ? this.currentColumn
+              : this.currentColumn + 1;
             this.currentSquare = "r" + this.currentRow + "c" + newColumn;
           }
           if (this.mode == "column") {
-            exceeded = Number(this.currentRow) + 1 >= this.squares;
-            let newRow = exceeded
-              ? Number(this.currentRow)
-              : Number(this.currentRow) + 1;
+            exceeded |= this.currentRow + 1 >= this.squares;
+            let newRow = exceeded ? this.currentRow : this.currentRow + 1;
             this.currentSquare = "r" + newRow + "c" + this.currentColumn;
           }
         } else {
           if (this.mode == "row") {
-            exceeded = Number(this.currentColumn) - 1 < 0;
-            let newColumn = exceeded ? 0 : Number(this.currentColumn) - 1;
+            exceeded |= this.currentColumn - 1 < 0;
+            let newColumn = exceeded
+              ? this.currentColumn
+              : this.currentColumn - 1;
             this.currentSquare = "r" + this.currentRow + "c" + newColumn;
           }
           if (this.mode == "column") {
-            exceeded = Number(this.currentRow) - 1 < 0;
-            let newRow = exceeded ? 0 : Number(this.currentRow) - 1;
+            exceeded |= this.currentRow - 1 < 0;
+            let newRow = exceeded ? this.currentRow : this.currentRow - 1;
             this.currentSquare = "r" + newRow + "c" + this.currentColumn;
           }
         }
@@ -119,6 +157,14 @@ export default {
           !exceeded
         ) {
           this.progressSquare("forward");
+        }
+        // Skip over blackboxes when reversing
+        if (
+          direction == "backward" &&
+          this.currentContents == "+" &&
+          !exceeded
+        ) {
+          this.progressSquare("backward");
         }
         this.handleSquare("keypress");
       }
@@ -177,6 +223,15 @@ export default {
         square.style.backgroundColor = color;
         square.style.color = "white";
       }
+      this.grid.forEach((row, rIndex) => {
+        row.forEach((col, cIndex) => {
+          if (col == "+") {
+            this.getFromCurrentSquare("grid").children[rIndex].children[
+              cIndex
+            ].children[0].style.backgroundColor = "black";
+          }
+        });
+      });
     },
     highlightMe: function() {
       this.colorSquares("grid", "white");
@@ -216,17 +271,19 @@ export default {
     },
     currentRow: function() {
       if (this.currentSquare) {
-        return this.currentSquare.substring(
-          this.currentSquare.lastIndexOf("r") + 1,
-          this.currentSquare.lastIndexOf("c")
+        return Number(
+          this.currentSquare.substring(
+            this.currentSquare.lastIndexOf("r") + 1,
+            this.currentSquare.lastIndexOf("c")
+          )
         );
       }
       return 0;
     },
     currentColumn: function() {
       if (this.currentSquare) {
-        return this.currentSquare.substring(
-          this.currentSquare.lastIndexOf("c") + 1
+        return Number(
+          this.currentSquare.substring(this.currentSquare.lastIndexOf("c") + 1)
         );
       }
       return 0;

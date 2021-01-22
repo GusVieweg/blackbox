@@ -1,6 +1,7 @@
 <template>
   <v-container>
-    <Grid :squares="5"></Grid>
+    <v-switch v-model="blackbox" label="Blackbox"></v-switch>
+    <Grid :squares="5" :blackbox="blackbox"></Grid>
     <v-row class="text-center">
       <v-col cols="12">
         <v-img
@@ -88,6 +89,7 @@ export default {
   name: "HelloWorld",
   components: { Grid },
   data: () => ({
+    blackbox: false,
     ecosystem: [
       {
         text: "vuetify-loader",
