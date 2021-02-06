@@ -33,7 +33,7 @@ export default {
       timer: null,
       result: [],
       grid: [],
-      currentSquare: "r0c0"
+      currentSquare: null
     };
   },
   props: {
@@ -52,13 +52,50 @@ export default {
           (charCode > 64 && charCode < 91) ||
           (charCode > 96 && charCode < 123)
         ) {
-          this.insertLetterIntoGrid(String.fromCharCode(e.keyCode));
-          this.progressSquare("forward");
+          if (!this.squareIsABlackBox) {
+            this.insertLetterIntoGrid(String.fromCharCode(e.keyCode));
+            this.progressSquare("forward");
+          }
         }
       }
-      if (e.code == "Backspace") {
+      if (e.code == "Backspace" && !this.squareIsABlackBox) {
         this.deleteLetterFromGrid();
         this.progressSquare("backward");
+      }
+      if (this.mode == "row") {
+        switch (e.code) {
+          case "ArrowRight":
+            this.progressSquare("forward");
+            break;
+          case "ArrowLeft":
+            this.progressSquare("backward");
+            break;
+          case "ArrowUp":
+            this.mode = "column";
+            this.highlightMe();
+            break;
+          case "ArrowDown":
+            this.mode = "column";
+            this.highlightMe();
+            break;
+        }
+      } else {
+        switch (e.code) {
+          case "ArrowRight":
+            this.mode = "row";
+            this.highlightMe();
+            break;
+          case "ArrowLeft":
+            this.mode = "row";
+            this.highlightMe();
+            break;
+          case "ArrowUp":
+            this.progressSquare("backward");
+            break;
+          case "ArrowDown":
+            this.progressSquare("forward");
+            break;
+        }
       }
     });
   },
@@ -74,9 +111,11 @@ export default {
     handleBlackbox() {
       if (this.currentSquare) {
         if (this.blackbox) {
-          this.grid[this.currentRow][this.currentColumn] = "+";
-        } else {
-          this.grid[this.currentRow][this.currentColumn] = "?";
+          if (this.squareIsABlackBox) {
+            this.grid[this.currentRow].splice(this.currentColumn, 1, "?");
+          } else {
+            this.grid[this.currentRow].splice(this.currentColumn, 1, "+");
+          }
         }
       }
     },
@@ -278,7 +317,7 @@ export default {
           )
         );
       }
-      return 0;
+      return null;
     },
     currentColumn: function() {
       if (this.currentSquare) {
@@ -286,10 +325,19 @@ export default {
           this.currentSquare.substring(this.currentSquare.lastIndexOf("c") + 1)
         );
       }
-      return 0;
+      return null;
     },
     currentContents: function() {
-      return this.grid[this.currentRow][this.currentColumn];
+      if (this.currentSquare) {
+        return this.grid[this.currentRow][this.currentColumn];
+      }
+      return null;
+    },
+    squareIsABlackBox: function() {
+      if (this.currentSquare) {
+        return this.currentContents == "+";
+      }
+      return false;
     }
   }
 };
