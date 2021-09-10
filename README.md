@@ -1,5 +1,7 @@
 # blackbox
 
+[PAUSED DEVELOPMENT - 02/07/2021]
+
 ## Project setup
 ```
 yarn install
